@@ -7,18 +7,18 @@ def number_of_attempts(num):
     return math.ceil(math.log2(num + 1))
 
 
-# проверка, что введено число (работает и с отрицательными числами)
+# проверка, что введено положительное число
 def is_valid(num):
     try:
         num = int(num)
-        return True
+        return num >= 0    # Проверяем, что число положительное или ноль
     except ValueError:
         return False
 
 
 # запуск игры
 def start():
-    print('Давай начнем игру! Введи интервал, в котором будешь угадывать число.')
+    print('Давай начнем игру! Введи интервал целых положительных чисел, в котором будешь угадывать число.')
     while True:
         left = input('Введи левую границу: ')
         right = input('Введи правую границу: ')
@@ -26,22 +26,22 @@ def start():
         if is_valid(left) and is_valid(right):
             left, right = int(left), int(right)
             if left != right:
+                if right < left:
+                    left, right = right, left  # Меняем местами, если ввели неправильно
                 break
             else:
                 print('Границы должны отличаться!')
         else:
             print('Введены некорректные числа, попробуй снова.')
+
     guessing_game(left, right)
 
 
 # определяем склонение слова
-def attempt_word(n):
-    n = number_of_attempts(n)
-    if 11 <= n % 100 <= 14:
-        return "попыток"
-    elif n % 10 == 1:
+def attempt_word(attempts_needed):
+    if attempts_needed % 10 == 1 and attempts_needed != 11:
         return "попытку"
-    elif 2 <= n % 10 <= 4:
+    elif 2 <= attempts_needed % 10 <= 4 and not (12 <= attempts_needed % 100 <= 14):
         return "попытки"
     else:
         return "попыток"
@@ -49,16 +49,16 @@ def attempt_word(n):
 
 # алгоритм игры
 def guessing_game(left, right):
-    if right < left:
-        left, right = right, left  # Меняем местами, если ввели неправильно
     num_0 = random.randint(left, right)
     attempts_needed = number_of_attempts(num_0)
+    print(f'Я загадал число от {left} до {right}. Ты можешь угадать число за {attempts_needed} {attempt_word(attempts_needed)}.')
 
-    if right > 0 and left > 0:
-        print(f'Я загадал число от {left} до {right}. Ты можешь угадать число за {attempts_needed} {attempt_word(attempts_needed)}.')
-    else:
-        print(f'Я загадал число от {left} до {right}.')
     counter = 0
+
+    guess_on_the_first_try = ['Скажи честно, ты подглядывал?', 'Кажется, у тебя есть третий глаз!', 'Какую магию ты использовал, чтобы угадать?']
+    need_higher = ['Бери выше, попробуй еще раз!', 'Введи число побольше.', 'Посмотри вверх.']
+    need_lower = ['Рожденный ползать летать не может - выбери число меньше.', 'Тебе нужно спуститься пониже...', 'Попробуй число поменьше.']
+
     while True:
         player_num = input('Введи число.')
         if is_valid(player_num):
@@ -66,35 +66,48 @@ def guessing_game(left, right):
             player_num = int(player_num)
             if player_num == num_0:
                 if counter == 1:
-                    print('Скажи честно, ты подглядывал?')
-                    if input('Хочешь сыграть еще раз? Введи "да" или "нет" ').lower() in ['да', 'lf']:
-                        start()
-                    else:
-                        print('Приходи, когда появится желание сыграть снова :)')
-                        break
+                    print(random.choice(guess_on_the_first_try))
                 else:
                     print(f'Молодец! Удача на твоей стороне, номер твоей попытки {counter}.')
-                    break
+                    if counter <= attempts_needed:
+                        print('Ты следовал моим подсказкам и уложился в оптимальное число попыток! Молодец!')
+                    else:
+                        print('А вот если бы ты слушал мои подсказки, ты угадал бы число быстрее!')
+
+                print('Спасибо, что поиграл в числовую угадайку. Еще увидимся...')
+
+                play_again() #запускаем игру снова
+                break
+
             elif int(player_num) < num_0:
-                print('Бери выше, попробуй еще раз!')
+                print(random.choice(need_higher))
             else:
-                print('Рожденный ползать летать не может - выбери число поменьше.')
+                print(random.choice(need_lower))
         else:
             print('Введено некорректное число, попробуй снова.')
-    print('Спасибо, что поиграл в числовую угадайку. Еще увидимся...')
-    play_again()
 
 
 # предлагаем сыграть повторно
 def play_again():
-    if input('Хочешь сыграть еще раз? ').lower() in ['да', 'lf']:
+    while True:
+        response = input('Хочешь сыграть еще раз? ').lower()
+        if response in ['да', 'lf']:
+            start()
+            break
+        elif response in ['нет', 'ytn']:
+            print('Приходи, когда появится желание сыграть.')
+            break
+        else:
+            print('Пожалуйста, ответь "да" или "нет".')
+
+
+# приглашение в игру
+def main():
+    if input('Привет! Не желаешь сыграть в игру? Введи "да" или "нет" ').lower() in ['да', 'lf']:
         start()
     else:
         print('Приходи, когда появится желание сыграть.')
 
 
-# приглашение в игру
-if input('Привет! Не желаешь сыграть в игру? Введи "да" или "нет" ').lower() in ['да', 'lf']:
-    start()
-else:
-    print('Приходи, когда появится желание сыграть.')
+# Запуск основной функции
+main()
