@@ -76,9 +76,11 @@ def guessing_game(left, right):
 
                 print('Спасибо, что поиграл в числовую угадайку. Еще увидимся...')
 
-                play_again() #запускаем игру снова
+                play_again() # запускаем игру снова
                 break
 
+            elif player_num < left or player_num > right:
+                print('Введи число в загаданном диапазоне')
             elif int(player_num) < num_0:
                 print(random.choice(need_higher))
             else:
